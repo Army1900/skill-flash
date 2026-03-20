@@ -1,0 +1,81 @@
+---
+name: universal-skill
+description: Cross-platform skill definition
+version: "1.0"
+
+# Core principles (Tier 1 - embed in system prompt)
+principles:
+  - id: principle_1
+    text: "Core principle statement"
+    priority: high
+
+  - id: principle_2
+    text: "Another core principle"
+    priority: medium
+
+# Structured rules (Tier 2 - session or scriptable)
+rules:
+  - name: checkable_rule
+    tier: 2
+    type: script
+    language: bash
+    check: |
+      #!/bin/bash
+      # Check condition
+      [ condition ] && echo "PASS" || echo "FAIL"
+
+  - name: descriptive_rule
+    tier: 3
+    type: model
+    description: "Rule that requires AI judgment"
+
+# Decision points (batch collection)
+decisions:
+  - id: framework_choice
+    prompt: "Which framework?"
+    options:
+      - value: react
+        label: "React"
+        default: true
+      - value: vue
+        label: "Vue"
+      - value: svelte
+        label: "Svelte"
+
+  - id: styling
+    prompt: "Styling approach?"
+    options:
+      - value: tailwind
+        label: "Tailwind CSS"
+      - value: css_modules
+        label: "CSS Modules"
+      - value: styled_components
+        label: "Styled Components"
+
+# Workflow definition
+workflow:
+  - step: initialize
+    action: setup_project
+    requires_decisions: [framework_choice, styling]
+
+  - step: implement
+    action: write_code
+    depends_on: [initialize]
+
+  - step: verify
+    action: run_tests
+    depends_on: [implement]
+
+# Platform-specific outputs
+platforms:
+  claude:
+    format: markdown
+    output: SKILL.md
+
+  openai:
+    format: json
+    output: gpt-config.json
+
+  cursor:
+    format: text
+    output: .cursorrules

@@ -1,0 +1,31 @@
+# Session Configuration for Claude
+# This file is loaded once per session and referenced thereafter
+
+session:
+  skills:
+    - example-skill
+
+  # Load at session start
+  loaded_at: session_start
+
+  # Use reference mode for subsequent calls
+  reference_mode: true
+
+# Core rules (tier 2)
+rules:
+  - name: rule_name
+    description: Brief description
+    check: "command or condition"
+
+# Workflows available this session
+workflows:
+  - name: main_workflow
+    steps:
+      - step_one
+      - step_two
+      - step_three
+
+# Scripts available
+scripts:
+  - check_prerequisites.sh
+  - validate_output.py
