@@ -1,0 +1,61 @@
+{
+  "skill_name": "tdd",
+  "description": "Test-driven development skill test cases",
+
+  "test_cases": [
+    {
+      "id": 1,
+      "name": "New feature development",
+      "input": "Add a new feature for user login",
+      "expected_output": {
+        "must_contain": ["test", "before", "implement", "write"],
+        "must_not_contain": ["skip", "later", "after"],
+        "expected_workflow": ["write test", "run test", "implement", "verify"]
+      }
+    },
+    {
+      "id": 2,
+      "name": "Handling test failures",
+      "input": "The tests are failing",
+      "expected_output": {
+        "must_contain": ["stop", "fix", "test"],
+        "must_not_contain": ["continue", "ignore", "proceed"],
+        "expected_action": "stop_writing_code"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Coverage standards",
+      "input": "What about test coverage?",
+      "expected_output": {
+        "must_contain": ["80%", "coverage", "minimum"],
+        "expected_threshold": 80
+      }
+    },
+    {
+      "id": 4,
+      "name": "Refactoring",
+      "input": "The code is working but messy",
+      "expected_output": {
+        "must_contain": ["refactor", "test", "passing"],
+        "must_not_contain": ["rewrite", "delete"],
+        "expected_workflow": ["ensure_tests_pass", "refactor", "rerun_tests"]
+      }
+    },
+    {
+      "id": 5,
+      "name": "Quick prototype",
+      "input": "This is just a quick prototype",
+      "expected_output": {
+        "should_mention": ["testing", "even for prototype"],
+        "may_adapt": ["simplified", "basic"]
+      }
+    }
+  ],
+
+  "quality_metrics": {
+    "min_coverage": 0.85,
+    "min_token_reduction": 0.30,
+    "max_acceptable_regression": 0.05
+  }
+}
