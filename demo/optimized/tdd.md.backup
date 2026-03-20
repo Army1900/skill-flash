@@ -1,0 +1,46 @@
+---
+name: tdd
+description: Test-driven development (optimized)
+optimized: true
+---
+
+# TDD (Optimized)
+
+> Core principles are embedded in system prompt. This handles edge cases.
+
+## Core Workflow
+
+1. Write test
+2. Run test (expect fail)
+3. Write code
+4. Run test (expect pass)
+5. Refactor
+
+**Red → Green → Refactor**
+
+## When to Use
+
+Use this skill for:
+- Choosing testing frameworks
+- Coverage analysis
+- Test refactoring strategies
+- Complex testing scenarios
+
+## Framework Selection
+
+Ask user: Which testing framework?
+- Python: pytest
+- JavaScript: Jest
+- Go: go test
+
+## Coverage Standard
+
+Maintain 80% minimum coverage.
+
+## Quick Reference
+
+- Test before code
+- Keep tests isolated
+- Keep tests fast
+- Don't skip tests
+- Don't ignore failures

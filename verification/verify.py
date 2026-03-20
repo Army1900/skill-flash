@@ -79,6 +79,7 @@ def calculate_content_coverage(original: str, optimized: str) -> Dict[str, Any]:
 
     total_coverage = sum(s['score'] for s in coverage_scores.values())
     coverage_scores['total'] = min(20, total_coverage)
+    coverage_scores['max'] = 20
 
     return coverage_scores
 
@@ -182,9 +183,10 @@ def calculate_overall_score(metrics: Dict) -> Tuple[int, str]:
 
     percentage = (total / max_score) * 100
 
-    if total >= 80:
+    # Use percentage for status determination (not absolute score)
+    if percentage >= 80:
         status = "PASSED"
-    elif total >= 60:
+    elif percentage >= 60:
         status = "NEEDS_REVIEW"
     else:
         status = "FAILED"
