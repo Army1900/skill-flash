@@ -162,6 +162,43 @@ For each extracted item, classify:
 - Mark if: Used in <20% of invocations
 - Target: Complex scenarios only
 
+### 3.1.1 Classification Guidelines
+
+**IMPORTANT: When in doubt, keep it in Tier 2 or 3**
+
+Better to have a slightly larger skill than to lose functionality.
+
+**Common classification errors**:
+
+❌ **Wrong**: "Refactoring is edge case" → Tier 3
+✅ **Correct**: "Refactoring is part of core TDD cycle" → Tier 2
+
+❌ **Wrong**: "Quality questions are low frequency" → Tier 3
+✅ **Correct**: "Quality checks should happen every time" → Tier 2
+
+❌ **Wrong**: "Framework examples are optional" → Delete
+✅ **Correct**: "Examples provide practical guidance" → Tier 2
+
+**Practicality First Rule**:
+
+```
+删除此内容会降低 skill 实用性吗？
+- Yes → 保留（即使减少 token 节省）
+- No → 可以删除
+```
+
+**Examples of what to keep**:
+- "How to" guidance (even if briefly stated)
+- Safety warnings (preventing mistakes)
+- Quality checklists (ensuring good results)
+- Practical examples (making it actionable)
+
+**Examples of what can remove**:
+- Redundant explanations
+- Verbose introductions
+- Duplicate information
+- Over-detailed background (unless critical)
+
 ### 3.2 Identify Scriptable Rules
 
 Look for rules with these patterns:
