@@ -282,13 +282,18 @@ fi
 
 ### 4.5 Optimize Decision Points
 
-**Key insight**: Smart defaults eliminate most questions. Optional configuration when needed.
+**Key insight**: Smart defaults reduce most questions. Optional configuration when needed.
 
-**Speed impact**:
-- Sequential questions: N questions = N round-trips
-- Smart defaults: 0 questions (usually)
-- Optional config: 1 round-trip (when needed)
-- Example: 5 questions → 0-1 round-trips = 5-10x faster
+**Speed impact** (realistic expectations):
+- Sequential questions: N questions = N round-trips (~60-90 seconds for 3 questions)
+- Smart defaults: Usually 0-1 round-trips (~20-30 seconds total)
+- Optional config: 1 round-trip when needed (~30-40 seconds)
+- Example: 3 questions → 2-3x faster on average
+
+**Token savings**:
+- Original: ~150 tokens for 3 questions + responses
+- Optimized: ~50-100 tokens (depends on user acceptance)
+- Average savings: ~40-50%
 
 #### Step 1: Identify Independent Decisions
 
@@ -458,20 +463,7 @@ After generating, verify:
 - [ ] Input format is simple and unambiguous
 - [ ] No questions that could be answered by context
 - [ ] Conditional decisions stay in-flow where they belong
-- Writing test-driven code (uses framework from config)
-- Analyzing coverage (uses target from config)
-- Setting up test structure (uses mock strategy from config)
-```
-
-#### Quality Check for Batched Decisions
-
-After generating, verify:
-
-- [ ] All independent decisions are in the initial section
-- [ ] No questions remain in the workflow body (unless truly conditional)
-- [ ] Defaults are provided for all non-critical decisions
-- [ ] Format is clear and easy to respond to
-- [ ] Dependencies are properly separated (conditional decisions stay in-flow)
+- [ ] Expectations are realistic (2-3x faster, not magic)
 
 ---
 
