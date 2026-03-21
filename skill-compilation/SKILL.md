@@ -280,14 +280,15 @@ else
 fi
 ```
 
-### 4.5 Batch Decision Points
+### 4.5 Optimize Decision Points
 
-**Key insight**: Multiple independent questions can be collected in ONE interaction, avoiding repeated back-and-forth.
+**Key insight**: Smart defaults eliminate most questions. Optional configuration when needed.
 
 **Speed impact**:
-- Sequential: N questions = N round-trips
-- Batched: N questions = 1 round-trip
-- Example: 5 questions → 5x faster initialization
+- Sequential questions: N questions = N round-trips
+- Smart defaults: 0 questions (usually)
+- Optional config: 1 round-trip (when needed)
+- Example: 5 questions → 0-1 round-trips = 5-10x faster
 
 #### Step 1: Identify Independent Decisions
 
@@ -295,106 +296,100 @@ Look for questions that:
 - Have NO dependency on each other's answers
 - Can be asked upfront before execution
 - Don't require context from the task
+- Have sensible defaults
 
 **Dependency check**:
 ```
-Q1: What framework? (React/Vue/Svelte)
-Q2: What state manager for [framework]? ← DEPENDS on Q1
-Q3: What styling approach? ← INDEPENDENT
+Q1: What framework? (React/Vue/Svelte) → Has default by language
+Q2: What state manager for [framework]? ← DEPENDS on Q1, keep in-flow
+Q3: What styling approach? (Tailwind/CSS) → Has clear default
 
-Result: Q1 and Q3 can be batched, Q2 must wait
+Result: Q1 has smart default, Q2 stays in-flow, Q3 has default
 ```
 
 **Marking patterns**:
-- "Ask user: X" without "depending on..." → Batchable
-- "Confirm: X" → Usually batchable
-- "Prompt for: X based on Y" → NOT batchable (has dependency)
+- "Ask user: X" with obvious default → Smart default
+- "Ask user: X" with dependency → Keep in-flow
+- "Confirm: X" → Usually unnecessary, remove or make default
 
-#### Step 2: Extract Decision Metadata
+#### Step 2: Extract and Prioritize Decisions
 
-For each batchable decision, extract:
+For each decision, categorize:
 
 ```yaml
 [decision_name]:
-  prompt: "The question text"
-  options: [list of choices]  # optional: predefined choices
-  default: "fallback choice"   # optional
-  required: true/false         # optional: default true
-  hint: "additional context"   # optional: helps user decide
+  has_smart_default: true/false     # Can we guess well?
+  default_value: "sensible choice"  # What works most often?
+  user_often_changes: true/false    # Do users frequently customize?
+  can_detect_from_context: true/false # Can we auto-detect?
 ```
+
+**Prioritization**:
+1. **Smart defaults** - High-quality defaults, auto-detect when possible
+2. **Optional config** - Clear format for when users want to customize
+3. **Keep in-flow** - Only decisions that truly depend on task context
 
 **Examples**:
 ```yaml
 testing_framework:
-  prompt: "Which testing framework?"
-  options: [pytest, unittest, nose2]
-  default: pytest
-  hint: "pytest is recommended for its fixtures and plugin ecosystem"
+  has_smart_default: true  # Detect from language/file extension
+  default_value: "pytest"   # For Python
+  can_detect_from_context: true
+  → Use smart default
 
 coverage_target:
-  prompt: "Target coverage percentage?"
-  options: [80%, 90%, 100%]
-  default: "80%"
-  required: false
+  has_smart_default: true
+  default_value: "80%"
+  user_often_changes: false
+  → Use smart default, mention in docs
 
-mock_strategy:
-  prompt: "Mock or real dependencies?"
-  options: [mock, real, hybrid]
-  hint: "mock for speed, real for integration tests"
+project_name:
+  has_smart_default: false
+  → Keep as in-flow question
 ```
 
-#### Step 3: Generate Batch Collection Format
+#### Step 3: Generate Smart Defaults Format
 
-**Format A: Initial Decisions Section (Recommended)**
-
-Add to the BEGINNING of compiled skill:
-
-```markdown
-## Initial Decisions
-
-Before starting work, I'll collect all preferences at once:
-
-| Decision | Options | Default | Your Choice |
-|----------|---------|---------|-------------|
-| Testing framework | pytest, unittest, nose2 | pytest | |
-| Coverage target | 80%, 90%, 100% | 80% | |
-| Mock strategy | mock, real, hybrid | mock | |
-
-**Please provide your choices (or press Enter to use defaults)**:
-1. Testing framework [pytest]:
-2. Coverage target [80%]:
-3. Mock strategy [mock]:
-
-Once collected, execution will proceed without interruption.
-```
-
-**Format B: YAML Config (Alternative)**
+**Recommended output**:
 
 ```markdown
 ## Configuration
 
-This skill requires upfront configuration. Provide values for:
+**Smart defaults** (usually work well):
+- Framework: auto-detected from your project
+- Coverage: 80% (industry standard)
+- Mock strategy: mock (faster, isolated)
 
-```yaml
-# TDD Configuration
-testing:
-  framework: pytest       # Options: pytest, unittest, nose2
-  coverage_target: "80%"  # Options: 80%, 90%, 100%
-  mock_strategy: mock     # Options: mock, real, hybrid
+I'll start with these. To customize, say **"config"** and I'll show options.
+
+---
+
+[Skill proceeds immediately with defaults]
+
+[If user says "config"]
+
+**Configuration options**:
+
+To change settings, provide in ONE message:
+```
+framework, coverage%, mock_strategy
 ```
 
-Copy this config, fill in your values, and I'll use it for all tasks.
+Example: `jest, 90%, real`
+
+Or set individually:
+- Framework: pytest, jest, go test, junit
+- Coverage: 80%, 90%, 100%
+- Mock: mock, real, hybrid
+
+Your config:
 ```
 
-**Format C: AskUserQuestion-style (For compatible platforms)**
-
-Generate structured decision collection:
-```
-Collect these decisions upfront:
-- framework (pytest/unittest/nose2, default: pytest)
-- coverage (80%/90%/100%, default: 80%)
-- mock_style (mock/real/hybrid, default: mock)
-```
+**Benefits**:
+- Zero latency for most users (defaults work)
+- Clear escape hatch ("say config")
+- One-shot configuration when needed
+- No confusion about input format
 
 #### Step 4: Transform Sequential Questions
 
@@ -412,74 +407,57 @@ Ask user: Should we mock dependencies?
 
 **After (compiled skill)**:
 ```markdown
-## Initial Configuration
+## Configuration
 
-This skill collects all preferences upfront to avoid interruptions:
+**Smart defaults**:
+- Framework: auto-detected (pytest for Python, jest for JS, etc.)
+- Coverage: 80%
+- Mock: yes (for fast, isolated tests)
 
-**Testing Setup**:
-1. Framework (pytest/unittest/nose2) [default: pytest]:
-2. Coverage (80%/90%/100%) [default: 80%]:
-3. Mock strategy (mock/real/hybrid) [default: mock]:
+I'll use these unless you say otherwise. To customize, say **"config"**.
 
-Provide your choices or press Enter for defaults. Execution continues automatically.
+---
 
 ## Core Workflow
-[Rest of skill - no more questions!]
+
+[Proceeds immediately - no questions needed]
+
+[Reference the defaults in workflow]
+"Using [detected framework] with 80% coverage target..."
 ```
 
 #### Step 5: Handle Conditional Decisions
 
-Some decisions DEPEND on earlier ones. Keep these in-line:
+Some decisions genuinely depend on context. Keep these in-flow:
 
 ```markdown
-## Initial Decisions (Independent)
-1. Framework [pytest]:
-2. Testing style [unit/integration]:
+## Smart Defaults (Independent)
+- Framework: auto-detected
+- Test style: unit by default
+
+[Skill starts work]
 
 ## Runtime Decisions (Dependent)
-# These are asked only when needed based on the above
+When context emerges, ask naturally:
 
-If framework == "pytest":
-  → Ask: pytest fixtures or plain setup?
-
-If testing_style == "integration":
-  → Ask: Database strategy (sqlite/postgresql)?
+"Writing integration tests. Should I use a real database or sqlite?"
+"Detected Django. Use pytest-django or plain pytest?"
 ```
 
-#### Output in Compiled Skill
+**Rule of thumb**:
+- Can be guessed/detected → Smart default
+- User often customizes → Optional config ("say config")
+- Truly task-specific → Ask naturally when relevant
 
-**Generated structure**:
+#### Quality Check for Optimized Decisions
 
-```
-[Compiled SKILL.md]
+After generating, verify:
 
----
-name: tdd-balanced
-has_initial_decisions: true
----
-
-# TDD Skill (Balanced Optimization)
-
-## Initial Decisions ⚡
-
-Collected once at start, then execution flows without interruption:
-
-**Testing Setup**:
-- Framework (pytest/unittest/nose2) [pytest]:
-- Coverage target (80%/90%/100%) [80%]:
-- Mock strategy (mock/real/hybrid) [mock]:
-
-Please provide your choices or accept defaults with Enter.
-
----
-
-## Core Workflow
-
-[No more questions - uses collected decisions]
-
-## When to Use This Skill
-
-Use this skill when:
+- [ ] All guessable decisions have smart defaults
+- [ ] Common customization path is clear ("say config")
+- [ ] Input format is simple and unambiguous
+- [ ] No questions that could be answered by context
+- [ ] Conditional decisions stay in-flow where they belong
 - Writing test-driven code (uses framework from config)
 - Analyzing coverage (uses target from config)
 - Setting up test structure (uses mock strategy from config)
