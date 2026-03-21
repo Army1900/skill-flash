@@ -282,39 +282,218 @@ fi
 
 ### 4.5 Batch Decision Points
 
-If skill has multiple questions, restructure:
+**Key insight**: Multiple independent questions can be collected in ONE interaction, avoiding repeated back-and-forth.
 
-**Before** (sequential - slow):
+**Speed impact**:
+- Sequential: N questions = N round-trips
+- Batched: N questions = 1 round-trip
+- Example: 5 questions → 5x faster initialization
+
+#### Step 1: Identify Independent Decisions
+
+Look for questions that:
+- Have NO dependency on each other's answers
+- Can be asked upfront before execution
+- Don't require context from the task
+
+**Dependency check**:
 ```
-Ask: What framework?
-[User answers]
-Ask: What state management?
-[User answers]
-Ask: What styling?
-[User answers]
+Q1: What framework? (React/Vue/Svelte)
+Q2: What state manager for [framework]? ← DEPENDS on Q1
+Q3: What styling approach? ← INDEPENDENT
+
+Result: Q1 and Q3 can be batched, Q2 must wait
 ```
 
-**After** (batch - fast):
+**Marking patterns**:
+- "Ask user: X" without "depending on..." → Batchable
+- "Confirm: X" → Usually batchable
+- "Prompt for: X based on Y" → NOT batchable (has dependency)
+
+#### Step 2: Extract Decision Metadata
+
+For each batchable decision, extract:
+
 ```yaml
-# Initial decisions - collect once
-decisions:
-  framework:
-    prompt: "Which framework?"
-    options: [React, Vue, Svelte]
-    default: React
-
-  state_management:
-    prompt: "State management?"
-    options: [Redux, Zustand, Context]
-    default: Context
-
-  styling:
-    prompt: "Styling approach?"
-    options: [Tailwind, CSS Modules, Styled Components]
-    default: Tailwind
-
-# After collection, execute without interruption
+[decision_name]:
+  prompt: "The question text"
+  options: [list of choices]  # optional: predefined choices
+  default: "fallback choice"   # optional
+  required: true/false         # optional: default true
+  hint: "additional context"   # optional: helps user decide
 ```
+
+**Examples**:
+```yaml
+testing_framework:
+  prompt: "Which testing framework?"
+  options: [pytest, unittest, nose2]
+  default: pytest
+  hint: "pytest is recommended for its fixtures and plugin ecosystem"
+
+coverage_target:
+  prompt: "Target coverage percentage?"
+  options: [80%, 90%, 100%]
+  default: "80%"
+  required: false
+
+mock_strategy:
+  prompt: "Mock or real dependencies?"
+  options: [mock, real, hybrid]
+  hint: "mock for speed, real for integration tests"
+```
+
+#### Step 3: Generate Batch Collection Format
+
+**Format A: Initial Decisions Section (Recommended)**
+
+Add to the BEGINNING of compiled skill:
+
+```markdown
+## Initial Decisions
+
+Before starting work, I'll collect all preferences at once:
+
+| Decision | Options | Default | Your Choice |
+|----------|---------|---------|-------------|
+| Testing framework | pytest, unittest, nose2 | pytest | |
+| Coverage target | 80%, 90%, 100% | 80% | |
+| Mock strategy | mock, real, hybrid | mock | |
+
+**Please provide your choices (or press Enter to use defaults)**:
+1. Testing framework [pytest]:
+2. Coverage target [80%]:
+3. Mock strategy [mock]:
+
+Once collected, execution will proceed without interruption.
+```
+
+**Format B: YAML Config (Alternative)**
+
+```markdown
+## Configuration
+
+This skill requires upfront configuration. Provide values for:
+
+```yaml
+# TDD Configuration
+testing:
+  framework: pytest       # Options: pytest, unittest, nose2
+  coverage_target: "80%"  # Options: 80%, 90%, 100%
+  mock_strategy: mock     # Options: mock, real, hybrid
+```
+
+Copy this config, fill in your values, and I'll use it for all tasks.
+```
+
+**Format C: AskUserQuestion-style (For compatible platforms)**
+
+Generate structured decision collection:
+```
+Collect these decisions upfront:
+- framework (pytest/unittest/nose2, default: pytest)
+- coverage (80%/90%/100%, default: 80%)
+- mock_style (mock/real/hybrid, default: mock)
+```
+
+#### Step 4: Transform Sequential Questions
+
+**Before (original skill)**:
+```markdown
+## Framework Selection
+Ask user: Which testing framework to use?
+
+## Coverage Requirements
+Ask user: What is the target coverage percentage?
+
+## Test Style
+Ask user: Should we mock dependencies?
+```
+
+**After (compiled skill)**:
+```markdown
+## Initial Configuration
+
+This skill collects all preferences upfront to avoid interruptions:
+
+**Testing Setup**:
+1. Framework (pytest/unittest/nose2) [default: pytest]:
+2. Coverage (80%/90%/100%) [default: 80%]:
+3. Mock strategy (mock/real/hybrid) [default: mock]:
+
+Provide your choices or press Enter for defaults. Execution continues automatically.
+
+## Core Workflow
+[Rest of skill - no more questions!]
+```
+
+#### Step 5: Handle Conditional Decisions
+
+Some decisions DEPEND on earlier ones. Keep these in-line:
+
+```markdown
+## Initial Decisions (Independent)
+1. Framework [pytest]:
+2. Testing style [unit/integration]:
+
+## Runtime Decisions (Dependent)
+# These are asked only when needed based on the above
+
+If framework == "pytest":
+  → Ask: pytest fixtures or plain setup?
+
+If testing_style == "integration":
+  → Ask: Database strategy (sqlite/postgresql)?
+```
+
+#### Output in Compiled Skill
+
+**Generated structure**:
+
+```
+[Compiled SKILL.md]
+
+---
+name: tdd-balanced
+has_initial_decisions: true
+---
+
+# TDD Skill (Balanced Optimization)
+
+## Initial Decisions ⚡
+
+Collected once at start, then execution flows without interruption:
+
+**Testing Setup**:
+- Framework (pytest/unittest/nose2) [pytest]:
+- Coverage target (80%/90%/100%) [80%]:
+- Mock strategy (mock/real/hybrid) [mock]:
+
+Please provide your choices or accept defaults with Enter.
+
+---
+
+## Core Workflow
+
+[No more questions - uses collected decisions]
+
+## When to Use This Skill
+
+Use this skill when:
+- Writing test-driven code (uses framework from config)
+- Analyzing coverage (uses target from config)
+- Setting up test structure (uses mock strategy from config)
+```
+
+#### Quality Check for Batched Decisions
+
+After generating, verify:
+
+- [ ] All independent decisions are in the initial section
+- [ ] No questions remain in the workflow body (unless truly conditional)
+- [ ] Defaults are provided for all non-critical decisions
+- [ ] Format is clear and easy to respond to
+- [ ] Dependencies are properly separated (conditional decisions stay in-flow)
 
 ---
 
