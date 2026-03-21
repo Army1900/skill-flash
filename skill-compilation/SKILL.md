@@ -320,27 +320,38 @@ decisions:
 
 ## Step 5: Write Output Files
 
-### 5.1 File Naming Convention
+### 5.1 Folder Naming Convention
 
-**Simple strategy-based naming:**
+**Skills are folders, not files. Create new folder for compiled variant:**
 
 ```
-Original file:          tdd.md
-Compiled (balanced):     tdd.balanced.md
-Compiled (aggressive):   tdd.aggressive.md
-Compiled (conservative): tdd.conservative.md
+skills/
+├── tdd/                    ← Original skill folder
+│   ├── SKILL.md
+│   ├── scripts/
+│   └── examples/
+│
+├── tdd-balanced/           ← Compiled (recommended)
+│   ├── SKILL.md          ← Optimized content
+│   ├── scripts/          ← Generated scripts
+│   └── examples/         ← Simplified examples
+│
+└── tdd-aggressive/         ← Alternative strategy
+    ├── SKILL.md
+    └── scripts/
 ```
 
-**User choice:**
-- Uses the `tdd.balanced.md` directly
-- Or compares versions: `diff tdd.md tdd.balanced.md`
-- Or renames to replace original: `mv tdd.balanced.md tdd.md`
+**User workflow:**
+```bash
+# Compare versions
+diff skills/tdd/SKILL.md skills/tdd-balanced/SKILL.md
 
-**Benefits:**
-- ✅ Original file preserved
-- ✅ Side-by-side comparison
-- ✅ Strategy clearly indicated
-- ✅ User has full control
+# Use compiled version
+cp -r skills/tdd-balanced/* skills/tdd/
+
+# Or switch to compiled folder
+cd skills/tdd-balanced/
+```
 
 ### 5.2 Output Structure
 

@@ -1,85 +1,66 @@
-# File Naming Convention
+# Skill Folder Naming Convention
 
-Simple, strategy-based naming for compiled skills.
+Skills are folders, not files. Use folder names to indicate compiled variants.
 
 ## Convention
 
 ```
-[skill-name].[strategy].md
+[skill-name]-[strategy]/
+├── SKILL.md              # Optimized skill content
+├── scripts/              # Generated scripts
+├── references/           # Supporting docs
+└── examples/             # Simplified examples
 ```
 
 ## Examples
 
 ```
-Original File:
-  tdd.md
-
-Compiled Variants:
-  tdd.balanced.md      ← Recommended (15% savings)
-  tdd.aggressive.md    ← Max savings (~40%)
-  tdd.conservative.md  ← Safe (~5% savings)
-
-Usage:
-  # Compare
-  diff tdd.md tdd.balanced.md
-
-  # Use optimized version
-  cp tdd.balanced.md tdd.md
-
-  # Try different strategy
-  cp tdd.aggressive.md tdd.md
-
-  # Cleanup
-  rm tdd.balanced.md tdd.aggressive.md
-```
-
-## Strategy Definitions
-
-| Strategy | Savings | Trade-off | Use When |
-|----------|---------|-----------|----------|
-| **balanced** | ~15% | Keeps key explanations | Default choice |
-| **aggressive** | ~40% | May lose explanations | Token-critical situations |
-| **conservative** | ~5% | Very safe, minimal changes | Risk-averse scenarios |
-
-## Directory Structure
-
-```
-project/
-├── skills/
-│   ├── tdd.md              ← Original
-│   ├── tdd.balanced.md     ← Compiled (recommended)
-│   └── tdd.report.md       ← Compilation report
-```
-
-## Alternative: Directory-Based
-
-If you prefer organization by variant:
-
-```
 skills/
-├── tdd.md                  ← Original
-├── compiled/
-│   ├── balanced/
-│   │   └── tdd.md
-│   ├── aggressive/
-│   │   └── tdd.md
-│   └── conservative/
-│       └── tdd.md
+├── tdd/                      ← Original skill
+│   ├── SKILL.md
+│   ├── scripts/
+│   └── examples/
+│
+├── tdd-balanced/              ← Compiled (recommended)
+│   ├── SKILL.md
+│   ├── scripts/
+│   │   ├── check_coverage.sh
+│   │   └── validate_tests.py
+│   └── examples/
+│
+├── tdd-aggressive/            ← Alternative strategy
+│   ├── SKILL.md
+│   └── scripts/
+│
+└── tdd-conservative/          ← Another alternative
+    └── SKILL.md
 ```
 
-Choose the style that fits your workflow.
-
-## Quick Reference
+## Usage Workflow
 
 ```
-Single skill, single strategy:
-  skill.balanced.md
+1. 编译
+   compile_skill skills/tdd/
+   → 生成 skills/tdd-balanced/
 
-Single skill, all strategies:
-  skill.balanced.md
-  skill.aggressive.md
-  skill.conservative.md
+2. 对比
+   diff skills/tdd/SKILL.md skills/tdd-balanced/SKILL.md
 
-Comparison:
-  diff skill.md skill.balanced.md
+3. 使用
+   # 方法1: 更新原技能文件夹
+   cp -r skills/tdd-balanced/* skills/tdd/
+
+   # 方法2: 切换到编译版本
+   cd skills/tdd-balanced/
+
+4. 清理
+   rm -rf skills/tdd-balanced/
 ```
+
+## Benefits
+
+- ✅ Skills remain self-contained
+- ✅ Scripts and examples stay with the skill
+- ✅ Easy to compare entire skill folders
+- ✅ Can have multiple variants side-by-side
+- ✅ Original skill folder untouched
