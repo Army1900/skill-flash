@@ -49,12 +49,24 @@ Before proceeding, ask the user:
 ```
 I'll help you optimize this skill. I need a few details:
 
-1. Target platform? (claude, openai, cursor, universal, or auto-detect)
-2. Primary goal? (token reduction, faster execution, cross-platform, or all)
-3. Output location? (file path, or I can show you first)
+1. **Target platform?** (claude, openai, cursor, universal, or auto-detect)
+2. **Optimization strategy?**
+   - balanced (15% savings, keeps key explanations) ← recommended
+   - aggressive (40% savings, may lose explanations)
+   - conservative (5% savings, very safe)
+3. **Generate all variants?**
+   - no: Generate only chosen strategy (default)
+   - yes: Generate all three for comparison
+
+4. **Compare with original?**
+   - no: Just generate the file
+   - yes: Show diff before generating
 ```
 
-Wait for user answers before continuing.
+**Note:** If user doesn't specify:
+- Strategy: `balanced`
+- Variants: `no` (only chosen strategy)
+- Compare: `no` (generate directly)
 
 ### 1.2 Read Target Skill File
 
@@ -308,41 +320,54 @@ decisions:
 
 ## Step 5: Write Output Files
 
-### 5.1 Determine Output Structure
+### 5.1 File Naming Convention
 
-Based on target platform:
+**Simple strategy-based naming:**
+
+```
+Original file:          tdd.md
+Compiled (balanced):     tdd.balanced.md
+Compiled (aggressive):   tdd.aggressive.md
+Compiled (conservative): tdd.conservative.md
+```
+
+**User choice:**
+- Uses the `tdd.balanced.md` directly
+- Or compares versions: `diff tdd.md tdd.balanced.md`
+- Or renames to replace original: `mv tdd.balanced.md tdd.md`
+
+**Benefits:**
+- ✅ Original file preserved
+- ✅ Side-by-side comparison
+- ✅ Strategy clearly indicated
+- ✅ User has full control
+
+### 5.2 Output Structure
+
+Based on target platform and user choices:
+
+**Single file output (if not generating all variants):**
 
 **Claude:**
 ```
-[output-dir]/
-├── CLAUDE.md.fragment      # Add to project CLAUDE.md
-├── session-config.yaml     # Session configuration
-├── SKILL.md                # Optimized skill
-├── scripts/
-│   ├── [script1].sh
-│   └── [script2].py
-└── compilation-report.md
+[same-directory-as-original]/
+├── tdd.balanced.md          # Optimized skill (main output)
+├── tdd.balanced.session.yaml # Session config
+├── tdd.balanced.scripts/     # Generated scripts
+└── tdd.report.md             # Compilation report
 ```
 
-**OpenAI:**
+**All variants (if user requested):**
+
 ```
-[output-dir]/
-├── system-prompt-addition.txt
-├── gpt-config.json
-├── functions/
-│   └── [function].py
-└── compilation-report.md
+[same-directory-as-original]/
+├── tdd.balanced.md
+├── tdd.aggressive.md
+├── tdd.conservative.md
+└── tdd.report.md             # Comparison of all variants
 ```
 
-**Cursor:**
-```
-[output-dir]/
-├── .cursorrules
-├── .vscode/tasks.json
-└── compilation-report.md
-```
-
-### 5.2 Write Files
+### 5.3 Write Files
 
 Use **Write tool** to create each file:
 
